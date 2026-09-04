@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickInvoice - Free Instant Invoice Generator for Small Businesses</title>
+  <meta name="description" content="Generate clean, professional invoices in seconds. Auto-calculating totals, PDF download, and WhatsApp text summaries. No signup needed.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- html2pdf.js CDN for client-side PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="app-header no-print">
+    <div class="header-container">
+      <div class="brand">
+        <div class="logo-icon">
+          <i data-lucide="receipt"></i>
+        </div>
+        <div>
+          <h1 class="logo-title">Quick<span>Invoice</span></h1>
+          <p class="logo-subtitle">Simple, instant invoicing for small businesses</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="btn-sample-data" class="btn btn-secondary btn-sm">
+          <i data-lucide="sparkles"></i> Load Sample Data
+        </button>
+        <button type="button" id="btn-reset" class="btn btn-ghost btn-sm" title="Clear all fields">
+          <i data-lucide="rotate-ccw"></i> Reset
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-layout">
+    <!-- LEFT PANEL: Editor Form -->
+    <section class="editor-section no-print" aria-label="Invoice Editor Form">
+      <form id="invoice-form" onsubmit="return false;">
+        <!-- Card 1: Invoice Meta & Currency -->
+        <div class="card form-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i data-lucide="file-text" class="card-icon"></i>
+              <span>Invoice Details</span>
+            </div>
+            <span class="badge badge-primary">Step 1</span>
+          </div>
+          <div class="grid grid-3">
+            <div class="form-group">
+              <label for="invoice-number">Invoice Number <span class="req">*</span></label>
+              <input type="text" id="invoice-number" class="form-control" placeholder="INV-2026-001" required>
+            </div>
+            <div class="form-group">
+              <label for="invoice-date">Invoice Date <span class="req">*</span></label>
+              <input type="date" id="invoice-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="due-date">Due Date</label>
+              <input type="date" id="due-date" class="form-control">
+            </div>
+          </div>
+          <div class="grid grid-2 mt-3">
+            <div class="form-group">
+              <label for="currency-select">Currency</label>
+              <select id="currency-select" class="form-control">
+                <option value="$" selected>USD ($)</option>
+                <option value="€">EUR (€)</option>
+                <option value="£">GBP (£)</option>
+                <option value="₹">INR (₹)</option>
+                <option value="A$">AUD (A$)</option>
+                <option value="C$">CAD (C$)</option>
+                <option value="S$">SGD (S$)</option>
+                <option value="R$">BRL (R$)</option>
+                <option value="AED">AED (AED)</option>
+                <option value="Ksh">KES (Ksh)</option>
+                <option value="₦">NGN (₦)</option>
+                <option value="¥">JPY / CNY (¥)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="payment-status">Status</label>
+              <select id="payment-status" class="form-control">
+                <option value="PAID">Paid</option>
+                <option value="DUE" selected>Payment Due</option>
+                <option value="PENDING">Pending</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Business & Customer Info -->
+        <div class="card form-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i data-lucide="building-2" class="card-icon"></i>
+              <span>Sender & Client Info</span>
+            </div>
+            <span class="badge badge-primary">Step 2</span>
+          </div>
+
+          <div class="grid grid-2-columns">
+            <!-- Your Business -->
+            <div class="sub-card">
+              <h3 class="sub-heading"><i data-lucide="store"></i> Your Business (From)</h3>
+              <div class="form-group">
+                <label for="business-name">Business Name <span class="req">*</span></label>
+                <input type="text" id="business-name" class="form-control" placeholder="e.g. Acme Studio" required>
+              </div>
+              <div class="form-group">
+                <label for="business-contact">Email / Phone</label>
+                <input type="text" id="business-contact" class="form-control" placeholder="contact@acmestudio.com">
+              </div>
+              <div class="form-group">
+                <label for="business-address">Address / Location</label>
+                <textarea id="business-address" class="form-control" rows="2" placeholder="123 Innovation Way, Suite 400"></textarea>
+              </div>
+            </div>
+
+            <!-- Customer Details -->
+            <div class="sub-card">
+              <h3 class="sub-heading"><i data-lucide="user-check"></i> Bill To (Client)</h3>
+              <div class="form-group">
+                <label for="customer-name">Client Name <span class="req">*</span></label>
+                <input type="text" id="customer-name" class="form-control" placeholder="e.g. Sarah Jenkins" required>
+              </div>
+              <div class="form-group">
+                <label for="customer-contact">Client Email / Phone</label>
+                <input type="text" id="customer-contact" class="form-control" placeholder="sarah@clientcorp.com">
+              </div>
+              <div class="form-group">
+                <label for="customer-address">Client Address</label>
+                <textarea id="customer-address" class="form-control" rows="2" placeholder="742 Evergreen Terrace"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Line Items -->
+        <div class="card form-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i data-lucide="list-ordered" class="card-icon"></i>
+              <span>Invoice Items</span>
+            </div>
+            <span class="badge badge-primary">Step 3</span>
+          </div>
+
+          <div class="items-table-wrapper">
+            <table class="items-table" id="items-table">
+              <thead>
+                <tr>
+                  <th style="width: 48%;">Item Description</th>
+                  <th style="width: 16%;">Qty</th>
+                  <th style="width: 22%;">Price</th>
+                  <th style="width: 14%; text-align: right;">Total</th>
+                  <th style="width: 40px;"></th>
+                </tr>
+              </thead>
+              <tbody id="items-body">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <button type="button" id="btn-add-item" class="btn btn-secondary btn-block mt-3">
+            <i data-lucide="plus-circle"></i> Add Item Line
+          </button>
+        </div>
+
+        <!-- Card 4: Taxes, Discounts & Notes -->
+        <div class="card form-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i data-lucide="calculator" class="card-icon"></i>
+              <span>Summary & Payment Terms</span>
+            </div>
+            <span class="badge badge-primary">Step 4</span>
+          </div>
+
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label for="tax-rate">Tax / VAT (%)</label>
+              <div class="input-prefix-wrap">
+                <input type="number" id="tax-rate" class="form-control" min="0" max="100" step="0.1" value="0" placeholder="0">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="discount-rate">Discount (%)</label>
+              <div class="input-prefix-wrap">
+                <input type="number" id="discount-rate" class="form-control" min="0" max="100" step="0.1" value="0" placeholder="0">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group mt-3">
+            <label for="invoice-notes">Payment Details & Notes</label>
+            <textarea id="invoice-notes" class="form-control" rows="3" placeholder="Bank: Chase Bank&#10;Account: 123456789 | Routing: 987654321&#10;Payment due within 14 days. Thank you!"></textarea>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- RIGHT PANEL: Live Preview & Action Toolbar -->
+    <section class="preview-section" aria-label="Invoice Preview and Export Actions">
+      <!-- Floating Action Bar -->
+      <div class="action-bar no-print">
+        <div class="action-bar-title">
+          <span class="pulse-indicator"></span>
+          <span>Live Invoice Preview</span>
+        </div>
+        <div class="action-buttons">
+          <button type="button" id="btn-generate" class="btn btn-primary" title="Update and focus invoice preview">
+            <i data-lucide="refresh-cw"></i> Update Preview
+          </button>
+          <button type="button" id="btn-whatsapp" class="btn btn-whatsapp" title="Copy formatted summary to paste into WhatsApp">
+            <i data-lucide="message-circle"></i> Copy Summary
+          </button>
+          <button type="button" id="btn-pdf" class="btn btn-danger" title="Download invoice as clean PDF">
+            <i data-lucide="download"></i> Download PDF
+          </button>
+          <button type="button" id="btn-print" class="btn btn-secondary" title="Print this invoice">
+            <i data-lucide="printer"></i> Print
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Invoice Document Sheet -->
+      <div class="invoice-sheet-container">
+        <div class="invoice-sheet" id="invoice-sheet">
+          <!-- Sheet Header -->
+          <div class="sheet-header">
+            <div class="sheet-brand">
+              <h2 id="preview-business-name" class="sheet-business-name">Your Business Name</h2>
+              <p id="preview-business-contact" class="sheet-business-meta">contact@yourbusiness.com</p>
+              <p id="preview-business-address" class="sheet-business-address">123 Street Name, City, Country</p>
+            </div>
+            <div class="sheet-meta-card">
+              <h1 class="sheet-title">INVOICE</h1>
+              <div class="sheet-meta-row">
+                <span class="meta-label">Invoice #:</span>
+                <span id="preview-invoice-number" class="meta-val highlight-mono">INV-0001</span>
+              </div>
+              <div class="sheet-meta-row">
+                <span class="meta-label">Date:</span>
+                <span id="preview-invoice-date" class="meta-val">Sep 4, 2026</span>
+              </div>
+              <div class="sheet-meta-row" id="preview-due-date-row">
+                <span class="meta-label">Due Date:</span>
+                <span id="preview-due-date" class="meta-val">Sep 18, 2026</span>
+              </div>
+              <div class="sheet-meta-row status-row">
+                <span class="meta-label">Status:</span>
+                <span id="preview-status-badge" class="sheet-status-badge status-due">Payment Due</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sheet-divider"></div>
+
+          <!-- Sheet Bill To -->
+          <div class="sheet-parties">
+            <div class="sheet-bill-to">
+              <span class="section-label">BILLED TO:</span>
+              <h3 id="preview-customer-name" class="sheet-client-name">Client Name</h3>
+              <p id="preview-customer-contact" class="sheet-client-meta">client@company.com</p>
+              <p id="preview-customer-address" class="sheet-client-address">456 Client Ave, Suite 2</p>
+            </div>
+          </div>
+
+          <!-- Items Table -->
+          <table class="sheet-table">
+            <thead>
+              <tr>
+                <th style="width: 50%;">Description</th>
+                <th style="width: 15%; text-align: center;">Qty</th>
+                <th style="width: 17%; text-align: right;">Unit Price</th>
+                <th style="width: 18%; text-align: right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="preview-items-body">
+              <!-- Dynamically populated preview rows -->
+            </tbody>
+          </table>
+
+          <!-- Totals Section -->
+          <div class="sheet-summary-layout">
+            <div class="sheet-notes-box">
+              <span class="section-label">PAYMENT DETAILS & NOTES:</span>
+              <p id="preview-notes" class="sheet-notes-text">Payment terms and banking information will appear here.</p>
+            </div>
+
+            <div class="sheet-totals-box">
+              <div class="total-line">
+                <span>Subtotal:</span>
+                <span id="preview-subtotal" class="mono-num">$0.00</span>
+              </div>
+              <div class="total-line" id="preview-discount-row">
+                <span>Discount (<span id="preview-discount-rate">0%</span>):</span>
+                <span id="preview-discount-amount" class="mono-num text-success">-$0.00</span>
+              </div>
+              <div class="total-line" id="preview-tax-row">
+                <span>Tax (<span id="preview-tax-rate">0%</span>):</span>
+                <span id="preview-tax-amount" class="mono-num">+$0.00</span>
+              </div>
+              <div class="total-divider"></div>
+              <div class="total-line grand-total">
+                <span>Grand Total:</span>
+                <span id="preview-grand-total" class="mono-num">$0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sheet Footer -->
+          <div class="sheet-footer">
+            <p class="sheet-thank-you">Thank you for your business!</p>
+            <p class="sheet-watermark">Generated securely with QuickInvoice</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive">
+    <div class="toast-icon"><i data-lucide="check-circle-2"></i></div>
+    <div class="toast-message" id="toast-message">Summary copied to clipboard!</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
